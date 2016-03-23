@@ -11,9 +11,22 @@
     "build": "npm run clean && babel ./src -d build",
     "lint": "eslint src tests && jscs src tests",
     "start": "node --harmony ./src/bin/github-pages",
-    "test": "npm run lint",
-    "deploy:coverage": "echo 'not-yet' || codeclimate-test-reporter < coverage/lcov.info",
+    "test": "npm run lint && nyc ava",
+    "deploy:coverage": "codeclimate-test-reporter < .coverage/lcov.info",
     "prepublish": "npm run build"
+  },
+  "ava": {
+    "files": [
+      "tests/"
+    ]
+  },
+  "nyc": {
+    "reporter": ["text", "lcov"],
+    "lines": 90,
+    "function": 90,
+    "branches": 90,
+    "check-coverage": true,
+    "report-dir": ".coverage"
   },
   "repository": {
     "type": "git",

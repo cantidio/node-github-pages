@@ -2,7 +2,7 @@
 const meow = require('meow');
 var parseArgs = require('minimist');
 
-const githubPages = require('../lib');
+const GithubPages = require('../lib');
 const cli = meow({
   help: `
   Usage
@@ -30,4 +30,5 @@ const cli = meow({
   }
 });
 
-githubPages(cli.flags);
+const ghpages = new GithubPages(cli.flags);
+ghpages.run();

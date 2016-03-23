@@ -7,11 +7,12 @@ cache:
   directories:
     - node_modules
 after_success:
-  - npm run deploy:coverage
-  - npm run deploy:gh-pages
+  - 'npm run deploy:coverage'
 deploy:
   provider: npm
   email: aniquilatorbloody@gmail.com
   'on':
     branch: master
     tags: true
+  api_key:
+    - secure: i7ou58HXJZEgzTG27jp5FIJPSvIoVNWGVXs3nr8hO22T4EY0NjCK0baBqPJzAgbl75x86rRr7GRVsNVOeQOri20s7KJCsPik9xVNewRgIiIJT9hNIILsnqkSmpUS8tpXM+HaLG2z75y/vN3ejbub7pyRuXKoZ6zUdQT0AG2tHm3JRXG0vZ7HLMOgXqkSYF20tNsdj7rbvxhUu6TKGe+DFPJTRz/40TC9eQ7Ka/zDidg9Yk8RhT5CjnMwsBSQGr3JFID3aVIwZ6SXLymBIjd3Is+/3azFPwLWA6nlLfki2OVFtx6qRazFAUiO2lFUkSPo2ODHxDJhzExeTHg6XniDaw/XR+MsqJtZTI96xdT6rlGoikQNLRasLv8x7Lux5xHy7r7uHyAU+Lwd9VgaDb/9QupZZtYnQsciq5WU3yZMJM2D+sfLFp++ZpfDlvAH5LUl1i3DshXiJ6916f1y9wIkT3snn5s/VJjn45mUa1XEJubfFgm7eRzhJBnmxdZxoKpHUvZc71Mxz1AO1LylMAXHi6ecA/zEz7v2Bs+UofphqCXmgh+S2vOeUo/PQP3eNv6VGCr9WkkhdCcBCafjLeeH3iGaw9pkbr/oD8JyB/lNllFym/jCHFTkBwYRjCFTBATHwRE2L/St8KW9vgoPBtqPWMveOhAPSu/X/dOyhq5uDyc=

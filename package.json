@@ -1,0 +1,26 @@
+{
+  "name": "github-pages",
+  "version": "0.1.0",
+  "description": "Tool for publishing your gh-pages using the githubapi",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cantidio/node-github-pages.git"
+  },
+  "keywords": [
+    "git",
+    "github",
+    "gh-pages",
+    "pages",
+    "ci"
+  ],
+  "author": "Cantidio Fontes <aniquilatorbloody@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/cantidio/node-github-pages/issues"
+  },
+  "homepage": "https://github.com/cantidio/node-github-pages#readme"
+}

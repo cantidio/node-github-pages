@@ -1,4 +1,4 @@
-[![NPM](https://nodei.co/npm/gorgon-editor.png)](https://nodei.co/npm/github-pages/)
+[![NPM](https://nodei.co/npm/github-pages.png)](https://nodei.co/npm/github-pages/)
 
 [![Build Status](https://travis-ci.org/cantidio/node-github-pages.svg?branch=master)](https://travis-ci.org/cantidio/node-github-pages)
 [![Code Climate](https://codeclimate.com/github/cantidio/node-github-pages/badges/gpa.svg)](https://codeclimate.com/github/cantidio/node-github-pages)

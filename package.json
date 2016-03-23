@@ -1,10 +1,19 @@
 {
   "name": "github-pages",
   "version": "0.1.0",
-  "description": "Tool for publishing your gh-pages using the githubapi",
-  "main": "index.js",
+  "description": "Publishes your github pages using the github API",
+  "main": "build/lib/index.js",
+  "bin": {
+    "github-pages": "./build/bin/github-pages.js"
+  },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "clean": "rimraf build coverage",
+    "build": "npm run clean && babel ./src -d build",
+    "lint": "eslint src tests && jscs src tests",
+    "start": "node --harmony ./src/bin/github-pages",
+    "test": "npm run lint",
+    "deploy:coverage": "echo 'not-yet' || codeclimate-test-reporter < coverage/lcov.info",
+    "prepublish": "npm run build"
   },
   "repository": {
     "type": "git",
@@ -22,5 +31,22 @@
   "bugs": {
     "url": "https://github.com/cantidio/node-github-pages/issues"
   },
-  "homepage": "https://github.com/cantidio/node-github-pages#readme"
+  "homepage": "https://github.com/cantidio/node-github-pages#readme",
+  "dependencies": {
+    "github": "^0.2.4",
+    "meow": "^3.7.0",
+    "npm": "^3.8.2"
+  },
+  "devDependencies": {
+    "ava": "^0.13.0",
+    "babel-cli": "^6.6.5",
+    "babel-eslint": "^5.0.0",
+    "codeclimate-test-reporter": "^0.3.1",
+    "eslint": "^2.4.0",
+    "eslint-plugin-babel": "^3.1.0",
+    "estraverse-fb": "^1.3.1",
+    "jscs": "^2.11.0",
+    "nyc": "^6.1.1",
+    "rimraf": "^2.5.2"
+  }
 }

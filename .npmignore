@@ -1,0 +1,10 @@
+tests
+src
+docs
+tools
+.babelrc
+.codeclimate.yml
+.eslintrc
+.jscsrc
+.npmignore
+.travis.yml

@@ -11,5 +11,5 @@ Tool for publishing gh-pages
 * [nyc](https://www.npmjs.com/package/nyc) for code-coverage
 * [jscs](https://www.npmjs.com/package/jscs) lint
 * [eslint](https://www.npmjs.com/package/eslint) lint
-* [travis](https://travis-ci.org)
+* [travis](https://travis-ci.org) Continous integration
 * [codeclimate](codeclimate.com) for resports on coverage & code analysis

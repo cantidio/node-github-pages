@@ -1,34 +1,38 @@
 #!/usr/bin/env node
 const meow = require('meow');
-var parseArgs = require('minimist');
-
+const parseConfig = require('../lib/parse-config');
 const GithubPages = require('../lib');
 const cli = meow({
   help: `
   Usage
-    $ github-pages [options]
+    $ github-pages [options] [src]
 
     Options
-    -g, --github
-    -t, --token
-    -u, --user
     -r, --repository
+    -t, --token
+        --api-version
+        --api-protocol
+        --api-host
+        --api-path
+        --api-timeout
 
   Examples
-    $ github-pages -t $GH_TOKEN -u cantidio -r github-pages
+    $ github-pages -r cantidio/github-pages -t $GH_TOKEN ./data
       > github-pages commit
       > github-pages push to cantidio/github-pages
 ` }, {
-  alias: {
-    g: 'github',
-    t: 'token',
-    u: 'user',
-    r: 'repository'
-  },
-  default: {
-    g: 'github.com'
+  alias:{
+    r: 'repo',
+    t: 'token'
   }
 });
 
-const ghpages = new GithubPages(cli.flags);
+const cfg = parseConfig(cli.flags, cli.input[0]);
+if (!cfg) {
+  console.log('provide the user, repo and token.');
+  console.log(cli.help);
+  process.exit(1);
+}
+
+const ghpages = new GithubPages(cfg);
 ghpages.run();

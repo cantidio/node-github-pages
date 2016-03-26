@@ -7,11 +7,74 @@
 [![devDependencies Status](https://david-dm.org/cantidio/node-github-pages/dev-status.svg)](https://david-dm.org/cantidio/node-github-pages#info=devDependencies)
 
 # Github Pages
+> Tool for publishing gh-pages.
 > This is not ready for usage yet
+
+## Install
 ```
   npm install --save-dev github-pages
 ```
-Tool for publishing gh-pages
+## Usage
+```
+  github-pages --help
+```
+
+```
+  Publishes your github pages using the github API
+
+  Usage
+    $ github-pages [options] [src]
+
+    Options
+    -r, --repository
+    -t, --token
+        --api-version
+        --api-protocol
+        --api-host
+        --api-path
+        --api-timeout
+
+  Examples
+    $ github-pages -r cantidio/github-pages -t $GH_TOKEN ./data
+      > github-pages commit
+      > github-pages push to cantidio/github-pages
+```
+
+# Configuration
+```json
+{
+  "api": {
+    "version": "3.0.0",
+    "protocol": "https",
+    "host": "api.github.com",
+    "pathPrefix": "",
+    "timeout": 5000
+  },
+  "auth": {
+    "type": "token",
+    "token": "GH_TOKEN"
+  },
+  "remote": {
+    "user": "my-user",
+    "repo": "my-repo",
+    "refs": "heads/gh-pages",
+  },
+  "commit": {
+    "message": "commit made by me",
+    "author": {
+      "name": "my-name",
+      "email": "my-email@prod.com"
+    }
+  },
+  "src": [
+    "./data"
+  ]
+}
+```
+
+# Roadmap
+ * Support multiple src folders
+ * .github-pagesrc ?
 
 # stack
 

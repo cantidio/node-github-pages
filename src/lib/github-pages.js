@@ -15,50 +15,43 @@ module.exports = class GithubPages {
     this.api.authenticate(this.config.auth);
   }
 
-  latestCommitSHA() {
+  runApi(msg, method, extract) {
     return new Promise((resolve, reject)=> {
-      const { user, repo } = this.config;
-      const ref = 'heads/master';
-      const msg = { user, repo, ref };
-      this.api.gitdata.getReference(msg, (err, data)=> {
+      method(this.api)(msg, (err, data)=> {
         if (err) {
           reject(err);
         } else {
-          this._commitSHA = data.object.sha;
-          resolve(data.object.sha);
+          const res = extract ? extract(data) : data;
+          resolve(res);
         }
       });
     });
+  }
+
+  latestCommitSHA() {
+    const { user, repo } = this.config;
+    const ref = 'heads/master';
+    const msg = { user, repo, ref };
+
+    return this.runApi(
+      msg,
+      (api)=> api.gitdata.getReference,
+      (res)=> {
+        this._commitSHA = res.object.sha;
+        return res.object.sha;
+      }
+    );
   }
 
   latestTreeSHA() {
     return this.latestCommitSHA().then((sha)=> {
       const { user, repo } = this.config;
       const msg = { user, repo, sha };
-      return new Promise((resolve, reject)=> {
-        this.api.gitdata.getCommit(msg, (err, data)=> {
-          if (err) {
-            reject(err);
-          } else {
-            resolve(data.tree.sha);
-          }
-        });
-      });
-    });
-  }
-
-  //TODO remove this.
-  getTree(sha) {
-    const { user, repo } = this.config;
-    const msg = { user, repo, sha, recursive: true };
-    return new Promise((resolve, reject)=> {
-      this.api.gitdata.getTree(msg, (err, data)=> {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(data.tree);
-        }
-      });
+      return this.runApi(
+        msg,
+        (api)=> api.gitdata.getCommit,
+        (res)=> res.tree.sha
+      );
     });
   }
 
@@ -66,71 +59,33 @@ module.exports = class GithubPages {
     const { src } = this.config;
 
     return list([src], { recurse: true, flatten: true }).then((files)=> {
-      files.shift(); //remove root data
-      //TODO filter out all folders
-      return files.map((file)=> {
-        let mode;
-        let type;
-        if (file.mode.dir) {
-          type = 'tree';
-          mode = '040000';
-        } else {
-          mode = file.mode.exec ? '100755' : '100644';
-          type = 'blob';
-        }
+      return files.filter(file=>!file.mode.dir).map((file)=> {
+        let mode = file.mode.exec ? '100755' : '100644';
+        let type = 'blob';
 
         return {
           fullPath: file.path,
           path: relativePath(src, file.path),
           mode,
-          type
-        };
-      });
-
-    });
-  }
-
-  //TODO remove this
-  getTreeDiff(sha) {
-    return Promise.all([
-      this.getTree(sha),
-      this.listFolderFiles()
-    ]).then((result)=> {
-      const treeGit = result[0];
-      const treeLocal = result[1];
-
-      return treeLocal.filter((file)=>file.type !== 'tree').map((fileLocal)=> {
-        const fileGit = treeGit.filter((fileGit)=>fileGit.path === fileLocal.path)[0];
-
-        return {
-          fullPath: fileLocal.fullPath,
-          path: fileLocal.path,
-          type: fileLocal.type,
-          mode: fileLocal.mode,
+          type,
           encoding
         };
       });
     });
   }
 
+  readFile(filePath) {
+    return new Buffer(fs.readFileSync(filePath)).toString(encoding);
+  }
+
   createBlob(filePath) {
     const { user, repo } = this.config;
-    const msg = {
-      user,
-      repo,
-      encoding,
-      content: new Buffer(fs.readFileSync(filePath)).toString(encoding)
-    };
-
-    return new Promise((resolve, reject)=> {
-      this.api.gitdata.createBlob(msg, (err, data)=> {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(data.sha);
-        }
-      });
-    });
+    const msg = { user, repo, encoding, content: this.readFile(filePath) };
+    return this.runApi(
+      msg,
+      (api)=> api.gitdata.createBlob,
+      (res)=> res.sha
+    );
   }
 
   createBlobs(files) {
@@ -143,18 +98,16 @@ module.exports = class GithubPages {
   createTree(tree, sha) {
     const { user, repo } = this.config;
     const msg = { user, repo, tree };
-    return new Promise((resolve, reject)=> {
-      this.api.gitdata.createTree(msg, (err, data)=> {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(data.sha);
-        }
-      });
-    });
+
+    return this.runApi(
+      msg,
+      (api)=> api.gitdata.createTree,
+      (res)=> res.sha
+    );
   }
 
   createCommit(tree) {
+    //TODO pass this._commitSHA as a param
     const { user, repo } = this.config;
     const msg = {
       user,
@@ -167,35 +120,26 @@ module.exports = class GithubPages {
       parents:[this._commitSHA],
       tree
     };
-    return new Promise((resolve, reject)=> {
-      this.api.gitdata.createCommit(msg, (err, data)=> {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(data.sha);
-        }
-      });
-    });
+    return this.runApi(
+      msg,
+      (api)=> api.gitdata.createCommit,
+      (res)=> res.sha
+    );
   }
 
   createRef(sha) {
     const { user, repo } = this.config;
     const msg = { user, repo, sha, ref: 'heads/master' };
-    return new Promise((resolve, reject)=> {
-      this.api.gitdata.updateReference(msg, (err, data)=> {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(data);
-        }
-      });
-    });
+    return this.runApi(
+      msg,
+      (api)=> api.gitdata.updateReference
+    );
   }
 
   run() {
     this.auth();
     this.latestTreeSHA()
-      .then((sha)=> this.getTreeDiff(sha)
+      .then((sha)=> this.listFolderFiles()
         .then((tree)=> this.createBlobs(tree))
         .then((tree)=> this.createTree(tree, sha))
         .then((sha)=> this.createCommit(sha))

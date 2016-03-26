@@ -52,12 +52,20 @@ function mergeObjects(...objs) {
   }, {});
 }
 
+function getEnvAuth() {
+  return {
+    type: 'token',
+    token: process.env.GH_TOKEN
+  };
+}
+
 module.exports =  (flags, src)=> {
   const fileCfg = pkgConf.sync('github-pages');
   const cliCfg = flagsToCfg(flags, src);
+
   const cfg = {
     api: mergeObjects(defaultCfg.api, fileCfg.api, cliCfg.api),
-    auth: mergeObjects(fileCfg.auth, cliCfg.auth),
+    auth: mergeObjects(getEnvAuth(), fileCfg.auth, cliCfg.auth),
     user: cliCfg.user || fileCfg.user,
     repo: cliCfg.repo || fileCfg.repo,
     src:  cliCfg.src  || fileCfg.src

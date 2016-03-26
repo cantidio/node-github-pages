@@ -58,8 +58,8 @@ module.exports = class GithubPages {
   listFolderFiles() {
     const { src } = this.config;
 
-    return list([src], { recurse: true, flatten: true }).then((files)=> {
-      return files.filter(file=>!file.mode.dir).map((file)=> {
+    return list([src], { recurse: true, flatten: true }).then((files)=>
+      files.filter((file)=> !file.mode.dir).map((file)=> {
         let mode = file.mode.exec ? '100755' : '100644';
         let type = 'blob';
 
@@ -70,8 +70,8 @@ module.exports = class GithubPages {
           type,
           encoding
         };
-      });
-    });
+      })
+    );
   }
 
   readFile(filePath) {

@@ -31,27 +31,21 @@ module.exports = class GithubPages {
   latestCommitSHA() {
     const { user, repo, ref } = this.config.remote;
     const msg = { user, repo, ref };
-
     return this.runApi(
       msg,
       (api)=> api.gitdata.getReference,
-      (res)=> {
-        this._commitSHA = res.object.sha;
-        return res.object.sha;
-      }
+      (res)=> res.object.sha
     );
   }
 
-  latestTreeSHA() {
-    return this.latestCommitSHA().then((sha)=> {
-      const { user, repo } = this.config.remote;
-      const msg = { user, repo, sha };
-      return this.runApi(
-        msg,
-        (api)=> api.gitdata.getCommit,
-        (res)=> res.tree.sha
-      );
-    });
+  getTreeSHA(sha) {
+    const { user, repo } = this.config.remote;
+    const msg = { user, repo, sha };
+    return this.runApi(
+      msg,
+      (api)=> api.gitdata.getCommit,
+      (res)=> res.tree.sha
+    );
   }
 
   listFolderFiles() {
@@ -105,8 +99,7 @@ module.exports = class GithubPages {
     );
   }
 
-  createCommit(tree) {
-    //TODO pass this._commitSHA as a param
+  createCommit(tree, parentSHA) {
     const { user, repo } = this.config.remote;
     const { message, author } = this.config.commit;
     const msg = {
@@ -114,8 +107,8 @@ module.exports = class GithubPages {
       repo,
       message,
       author,
-      parents:[this._commitSHA],
-      tree
+      tree,
+      parents: [parentSHA]
     };
     return this.runApi(
       msg,
@@ -135,17 +128,16 @@ module.exports = class GithubPages {
   }
 
   run() {
+    let commitSHA;
     this.auth();
-    this.latestTreeSHA()
+    return this.latestCommitSHA()
+      .then((sha)=> commitSHA = sha)
+      .then((sha)=> this.getTreeSHA(sha))
       .then((sha)=> this.listFolderFiles()
         .then((tree)=> this.createBlobs(tree))
         .then((tree)=> this.createTree(tree, sha))
-        .then((sha)=> this.createCommit(sha))
+        .then((sha)=> this.createCommit(sha, commitSHA))
         .then((sha)=> this.createRef(sha))
-      ).then((data)=> {
-        console.log(JSON.stringify(data, null, 2));
-      }).catch((err)=> {
-        console.log(err);
-      });
+      );
   }
 };

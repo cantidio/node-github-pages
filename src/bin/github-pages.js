@@ -2,6 +2,7 @@
 const meow = require('meow');
 const parseConfig = require('../lib/parse-config');
 const GithubPages = require('../lib');
+
 const cli = meow({
   help: `
   Usage
@@ -24,7 +25,7 @@ const cli = meow({
       > github-pages commit
       > github-pages push to cantidio/github-pages
 ` }, {
-  alias:{
+  alias: {
     r: 'repo',
     t: 'token',
     m: 'commit-message',
@@ -32,13 +33,21 @@ const cli = meow({
   }
 });
 
-const cfg = parseConfig(cli.flags, cli.input[0]);
+const config = parseConfig(cli.flags, cli.input[0]);
 
-if (!cfg) {
+if (!config) {
   console.log('provide the user, repo and token.');
   console.log(cli.help);
   process.exit(1);
 }
 
-const ghpages = new GithubPages(cfg);
-ghpages.run();
+const ghpages = new GithubPages(config);
+
+console.log('GithubPages:run.');
+console.log(`GithubPages:update ${config.remote.ref}`);
+ghpages.run().then((res)=> {
+  console.log('GithubPages:done');
+}).catch((err)=> {
+  console.error('GithubPages:error updating remote ref.');
+  process.exit(1);
+});

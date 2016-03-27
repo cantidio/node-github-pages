@@ -10,6 +10,9 @@ const cli = meow({
     Options
     -r, --repository
     -t, --token
+    -m  --commit-message
+    -a  --commit-author
+        --remote-ref
         --api-version
         --api-protocol
         --api-host
@@ -23,11 +26,14 @@ const cli = meow({
 ` }, {
   alias:{
     r: 'repo',
-    t: 'token'
+    t: 'token',
+    m: 'commit-message',
+    a: 'commit-author'
   }
 });
 
 const cfg = parseConfig(cli.flags, cli.input[0]);
+
 if (!cfg) {
   console.log('provide the user, repo and token.');
   console.log(cli.help);

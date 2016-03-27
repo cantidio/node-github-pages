@@ -55,16 +55,12 @@
     "token": "GH_TOKEN"
   },
   "remote": {
-    "user": "my-user",
-    "repo": "my-repo",
-    "refs": "heads/gh-pages",
+    "repo": "my-user/my-repo",
+    "ref": "heads/gh-pages"
   },
   "commit": {
     "message": "commit made by me",
-    "author": {
-      "name": "my-name",
-      "email": "my-email@prod.com"
-    }
+    "author": "my-name <my-email@prod.com>"
   },
   "src": [
     "./data"

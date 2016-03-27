@@ -103,3 +103,5 @@ module.exports =  (flags, src)=> {
 
   return config;
 };
+
+module.exports.default = defaultCfg;

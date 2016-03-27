@@ -21,9 +21,9 @@ const cli = meow({
         --api-timeout
 
   Examples
-    $ github-pages -r cantidio/github-pages -t $GH_TOKEN ./data
+    $ github-pages -r cantidio/node-github-pages -t $GH_TOKEN ./data
       > github-pages commit
-      > github-pages push to cantidio/github-pages
+      > github-pages push to cantidio/node-github-pages
 ` }, {
   alias: {
     r: 'repo',
@@ -44,8 +44,8 @@ if (!config) {
 const ghpages = new GithubPages(config);
 
 console.log('GithubPages:run.');
-console.log(`GithubPages:update ${config.remote.ref}`);
-ghpages.run().then((res)=> {
+console.log(`GithubPages:publish ${config.remote.ref}`);
+ghpages.publish().then((res)=> {
   console.log('GithubPages:done');
 }).catch((err)=> {
   console.error('GithubPages:error updating remote ref.');

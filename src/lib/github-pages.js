@@ -127,7 +127,7 @@ module.exports = class GithubPages {
     );
   }
 
-  run() {
+  publish() {
     let commitSHA;
     this.auth();
     return this.latestCommitSHA()

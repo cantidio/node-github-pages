@@ -1,5 +1,6 @@
 'use strict';
 var pkgConf = require('pkg-conf');
+var objectMerge = require('./object-merge');
 
 const defaultCfg = {
   api: {
@@ -8,23 +9,43 @@ const defaultCfg = {
     host: 'api.github.com',
     pathPrefix: '',
     timeout: 5000,
+  },
+  auth: {
+    type: 'token',
+    token: process.env.GH_TOKEN
+  },
+  remote: {
+    ref: 'heads/gh-pages'
+  },
+  commit: {
+    message: 'github-pages publish.'
   }
 };
 
-function splitRepoSlug(repoSlug) {
-  if (repoSlug) {
-    const slug = repoSlug.split('/');
-    return {
-      user: slug[0],
-      repo: slug[1]
-    };
-  }
+function parseRepo(repoSlug) {
+  const slug = (repoSlug || '').split('/');
+  const [user, repo] = slug;
+  return {
+    user,
+    repo
+  };
+}
 
-  return {};
+function parseAuthor(author) {
+  let emailExp = /^.*<(.+)>.*$/;
+  let nameExp = /^(.*\S).*<.*$/;
+
+  try {
+    return {
+      name: nameExp.exec(author)[1],
+      email: emailExp.exec(author)[1]
+    };
+  } catch (e) {
+    return undefined;
+  }
 }
 
 function flagsToCfg(flags, src) {
-  const { user, repo } = splitRepoSlug(flags.repo);
   return {
     api: {
       version: flags.apiVersion,
@@ -37,47 +58,48 @@ function flagsToCfg(flags, src) {
       type: flags.token ? 'token' : undefined,
       token: flags.token
     },
-    user,
-    repo,
+    commit: {
+      message: flags.commitMessage,
+      author: flags.commitAuthor
+    },
+    remote: {
+      repo: flags.repo,
+      ref: flags.remoteRef
+    },
     src: src && src.length > 0 ? src : undefined
   };
 }
 
-function mergeObjects(...objs) {
-  return objs.filter((obj)=>obj !== undefined).reduce((a, b)=> {
-    const obj = Object.assign({}, a);
-    const keys = Object.keys(b).filter((k)=> b[k] !== undefined);
-    keys.forEach((k)=> obj[k] = b[k]);
-    return obj;
-  }, {});
+function normalizeConfig(config) {
+  const { remote, commit } = config;
+  if (remote && remote.repo) {
+    Object.assign(remote, parseRepo(remote.repo));
+  }
+
+  if (commit && commit.author) {
+    commit.author = parseAuthor(commit.author);
+  }
+
+  return Object.assign({}, config, { remote, commit });
 }
 
-function getEnvAuth() {
-  return {
-    type: 'token',
-    token: process.env.GH_TOKEN
-  };
+function isConfigValid(config) {
+  const { remote, auth, src } = config || {};
+  return (
+    remote && remote.repo && remote.user &&
+    auth   && auth.type   && auth.token  &&
+    src    && src.length > 0
+  );
 }
 
 module.exports =  (flags, src)=> {
   const fileCfg = pkgConf.sync('github-pages');
   const cliCfg = flagsToCfg(flags, src);
+  const config = normalizeConfig(objectMerge(defaultCfg, fileCfg, cliCfg));
 
-  const cfg = {
-    api: mergeObjects(defaultCfg.api, fileCfg.api, cliCfg.api),
-    auth: mergeObjects(getEnvAuth(), fileCfg.auth, cliCfg.auth),
-    user: cliCfg.user || fileCfg.user,
-    repo: cliCfg.repo || fileCfg.repo,
-    src:  cliCfg.src  || fileCfg.src
-  };
-
-  if (!(
-    cfg.repo && cfg.user &&
-    cfg.auth && cfg.auth.token &&
-    cfg.src  && cfg.src.length > 0
-  )) {
+  if (!isConfigValid(config)) {
     return null;
   }
 
-  return cfg;
+  return config;
 };

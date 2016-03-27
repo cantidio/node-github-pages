@@ -29,8 +29,7 @@ module.exports = class GithubPages {
   }
 
   latestCommitSHA() {
-    const { user, repo } = this.config;
-    const ref = 'heads/master';
+    const { user, repo, ref } = this.config.remote;
     const msg = { user, repo, ref };
 
     return this.runApi(
@@ -45,7 +44,7 @@ module.exports = class GithubPages {
 
   latestTreeSHA() {
     return this.latestCommitSHA().then((sha)=> {
-      const { user, repo } = this.config;
+      const { user, repo } = this.config.remote;
       const msg = { user, repo, sha };
       return this.runApi(
         msg,
@@ -79,7 +78,7 @@ module.exports = class GithubPages {
   }
 
   createBlob(filePath) {
-    const { user, repo } = this.config;
+    const { user, repo } = this.config.remote;
     const msg = { user, repo, encoding, content: this.readFile(filePath) };
     return this.runApi(
       msg,
@@ -96,7 +95,7 @@ module.exports = class GithubPages {
   }
 
   createTree(tree, sha) {
-    const { user, repo } = this.config;
+    const { user, repo } = this.config.remote;
     const msg = { user, repo, tree };
 
     return this.runApi(
@@ -108,15 +107,13 @@ module.exports = class GithubPages {
 
   createCommit(tree) {
     //TODO pass this._commitSHA as a param
-    const { user, repo } = this.config;
+    const { user, repo } = this.config.remote;
+    const { message, author } = this.config.commit;
     const msg = {
       user,
       repo,
-      message: 'Commit from github-pages',
-      author: {
-        name:'cantidio fontes',
-        email: 'aniquilatorbloody@gmail.com'
-      },
+      message,
+      author,
       parents:[this._commitSHA],
       tree
     };
@@ -128,8 +125,9 @@ module.exports = class GithubPages {
   }
 
   createRef(sha) {
-    const { user, repo } = this.config;
-    const msg = { user, repo, sha, ref: 'heads/master' };
+    const { user, repo, ref } = this.config.remote;
+    const msg = { user, repo, sha, ref };
+
     return this.runApi(
       msg,
       (api)=> api.gitdata.updateReference

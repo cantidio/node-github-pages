@@ -29,6 +29,9 @@
     "include": [
       "src/"
     ],
+    "exclude":[
+      "src/bin"
+    ],
     "reporter": [
       "text",
       "lcov"

@@ -16,15 +16,13 @@
     "prepublish": "npm run build"
   },
   "ava": {
-    "files": [
-      "tests/"
-    ]
+    "files": ["tests/"],
+    "require": ["babel-register"],
+    "babel": "inherit"
   },
   "nyc": {
     "all": true,
-    "include": [
-      "src/"
-    ],
+    "include": ["src/"],
     "reporter": [
       "text",
       "lcov"
@@ -33,7 +31,8 @@
     "function": 90,
     "branches": 90,
     "check-coverage": false,
-    "report-dir": ".coverage"
+    "report-dir": ".coverage",
+    "require": ["babel-register"]
   },
   "repository": {
     "type": "git",

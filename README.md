@@ -24,7 +24,7 @@ Usage
   $ github-pages [options] [src]
 
   Options
-  -r, --repository
+  -r, --repo
   -t, --token
   -m  --commit-message
   -a  --commit-author
@@ -36,9 +36,9 @@ Usage
       --api-timeout
 
 Examples
-  $ github-pages -r cantidio/node-github-pages -t $GH_TOKEN ./data
+  $ github-pages -r user/repo -t $GH_TOKEN ./data
     > github-pages commit
-    > github-pages push to cantidio/node-github-pages
+    > github-pages push to user/repo
 ```
 *Not that the CLI arguments will always overwrite your github-pages configuration in your package.json file.*
 
@@ -67,12 +67,16 @@ All of the CLI options can be configured in the GithubPages section of your pack
       "token": "GH_TOKEN"
     },
     "remote": {
-      "repo": "my-user/my-repo",
+      "user": "user",
+      "repo": "repo",
       "ref": "heads/gh-pages"
     },
     "commit": {
       "message": "commit made by me",
-      "author": "my-name <my-email@prod.com>"
+      "author": {
+        "name": "author-name",
+        "email": "author-email"
+      }
     },
     "src": [
       "./data"
@@ -98,18 +102,30 @@ Arguments passed to the CLI will always take precedence over the configuration i
     console.error(JSON.stringify(err, null, 2));
   });
 ```
-The GithubPages needs the complete configuration to be used. If you don't want to provide all the configuration you can use the support file *parse-config*.
+The GithubPages needs the complete configuration to be used (*same file structure as described in package.json*). If you don't want to provide all the configuration you can use the support file *parse-config*, passing the same arguments as the cli (using camelCase).
 ```js
   const GithubPages = require('github-pages');
   const parseConfig = require('github-pages').parseConfig;
   const config = parseConfig({
-    repo: 'cantidio/node-github-pages',
-    token: 'MY-SUPER-SECRET-TOKEN'
+    repo: 'user/repo',
+    token: 'GH-TOKEN',
+    remoteRef: 'heads/gh-pages',
+    commitMessage: 'publishing from API.',
+    commitAuthor: 'author-name <author-email>',
+    apiVersion: '3.0.0',
+    apiProtocol: 'https',
+    apiHost: 'api.github.com',
+    apiPath: '',
+    apiTimeout: 5000
   }, './dist');
 
   const pages = new GithubPages(config);
 ```
-The *parseConfig* method receives as a input the same structure used in the cli, which is a plain object with the cli params using camelCase, different from the one used in the package.json. Besides that, *parseConfig* method will try to preload the configuration from your *package.json*. If you want to get the default configuration and change it yourself, then use if directly:
+The *parseConfig* method receives as a input the same structure used in the cli, which is a plain object with the cli params using camelCase, different from the one used in the package.json. Besides that, *parseConfig* method will try to preload the configuration from your *package.json*.
+
+*The parseConfig function will return null if the final configuration is invalid.*
+
+If you want to get the default configuration and change it yourself, then use if directly:
 ```js
   const config = require('github-pages').parseConfig.default;
   /* => {
@@ -120,12 +136,17 @@ The *parseConfig* method receives as a input the same structure used in the cli,
       pathPrefix: '',
       timeout: 5000
     },
-    auth: { type: 'token' },
+    auth: { type: 'token', token: 'GH_TOKEN' },
     remote: { ref: 'heads/gh-pages' },
     commit: { message: 'github-pages publish.' }
   } */
 ```
-To get more information about the config object, look at the './src/lib/parse-config.js' file.
+If you want to validate your config object, you can use the helper function from parseConfig called isValid:
+```js
+  const isValid = require('github-pages').parseConfig.isValid;
+  isValid(config);
+  // true|false
+```
 
 # stack
 

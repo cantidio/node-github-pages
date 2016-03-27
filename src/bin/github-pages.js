@@ -9,7 +9,7 @@ const cli = meow({
     $ github-pages [options] [src]
 
     Options
-    -r, --repository
+    -r, --repo
     -t, --token
     -m  --commit-message
     -a  --commit-author
@@ -21,9 +21,9 @@ const cli = meow({
         --api-timeout
 
   Examples
-    $ github-pages -r cantidio/node-github-pages -t $GH_TOKEN ./data
+    $ github-pages -r user/repo -t $GH_TOKEN ./data
       > github-pages commit
-      > github-pages push to cantidio/node-github-pages
+      > github-pages push to user/repo
 ` }, {
   alias: {
     r: 'repo',
@@ -36,7 +36,7 @@ const cli = meow({
 const config = parseConfig(cli.flags, cli.input[0]);
 
 if (!config) {
-  console.log('provide the user, repo and token.');
+  console.log('Please provide the user, repo and token.');
   console.log(cli.help);
   process.exit(1);
 }

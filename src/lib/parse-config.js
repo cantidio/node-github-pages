@@ -23,11 +23,15 @@ const defaultCfg = {
 };
 
 function parseRepo(repoSlug) {
-  const slug = (repoSlug || '').split('/');
-  const [user, repo] = slug;
+  const slugExp = /^([^\/]+)\/([^\/]+)$/;
+  const slug = slugExp.exec(repoSlug);
+  if (!slug) {
+    return {};
+  }
+
   return {
-    user,
-    repo
+    user: slug[1],
+    repo: slug[2]
   };
 }
 
@@ -46,6 +50,9 @@ function parseAuthor(author) {
 }
 
 function flagsToCfg(flags, src) {
+  const { user, repo } = parseRepo(flags.repo);
+  const author = parseAuthor(flags.commitAuthor);
+
   return {
     api: {
       version: flags.apiVersion,
@@ -60,30 +67,18 @@ function flagsToCfg(flags, src) {
     },
     commit: {
       message: flags.commitMessage,
-      author: flags.commitAuthor
+      author
     },
     remote: {
-      repo: flags.repo,
+      user,
+      repo,
       ref: flags.remoteRef
     },
     src: src && src.length > 0 ? src : undefined
   };
 }
 
-function normalizeConfig(config) {
-  const { remote, commit } = config;
-  if (remote && remote.repo) {
-    Object.assign(remote, parseRepo(remote.repo));
-  }
-
-  if (commit && commit.author) {
-    commit.author = parseAuthor(commit.author);
-  }
-
-  return Object.assign({}, config, { remote, commit });
-}
-
-function isConfigValid(config) {
+function isValid(config) {
   const { remote, auth, src } = config || {};
   return (
     remote && remote.repo && remote.user &&
@@ -95,9 +90,9 @@ function isConfigValid(config) {
 module.exports =  (flags, src)=> {
   const fileCfg = pkgConf.sync('github-pages');
   const cliCfg = flagsToCfg(flags, src);
-  const config = normalizeConfig(objectMerge(defaultCfg, fileCfg, cliCfg));
+  const config = objectMerge(defaultCfg, fileCfg, cliCfg);
 
-  if (!isConfigValid(config)) {
+  if (!isValid(config)) {
     return null;
   }
 
@@ -105,3 +100,4 @@ module.exports =  (flags, src)=> {
 };
 
 module.exports.default = defaultCfg;
+module.exports.isValid = isValid;

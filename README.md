@@ -148,6 +148,23 @@ If you want to validate your config object, you can use the helper function from
   // true|false
 ```
 
+### Integrating with Travis CI
+To use GithubPages on your CI server, just install your lib and set your configuration.
+For a less intrusive aproach, just create a script in your package.json for GithubPages:
+```json
+{
+  "script": {
+    "gh-pages": "github-pages -r user/repo ./dist"
+  }
+}
+```
+add the following to your .travis.yml:
+```yaml
+after_success: npm run gh-pages
+```
+Remember that you need to provide the environment var GH_TOKEN.
+To learn how to provide this var in a secure and safe way, look at [travis-encrypted-environment-variables](https://docs.travis-ci.com/user/environment-variables/#Encrypted-Variables) or [travis-repository-variables](https://docs.travis-ci.com/user/environment-variables/#Defining-Variables-in-Repository-Settings) (recommended).
+
 # stack
 
 * [meow](https://www.npmjs.com/package/meow) for cli

@@ -78,9 +78,7 @@ All of the CLI options can be configured in the GithubPages section of your pack
         "email": "author-email"
       }
     },
-    "src": [
-      "./data"
-    ]
+    "src": "./data"
   }
 }
 ```
